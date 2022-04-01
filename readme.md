@@ -1,7 +1,7 @@
 # Generalized Aggressive Decoding
 
-Implementation for the paper "Lossless Speedup of Autoregressive Translation with
-Generalized Aggressive Decoding"
+Implementation for the paper [Lossless Speedup of Autoregressive Translation with
+Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 
 ### Requirements
 
