@@ -12,7 +12,7 @@ Generalized Aggressive Decoding"
 
 ```
 conda create -n gad python=3.7
-cd Generalized-Aggressive-Decoding
+cd GAD
 pip install --editable .
 ```
 
