@@ -35,7 +35,6 @@ def fairseq_generate(data_lines, cfg, models, task, batch_size, device):
     generator = task.build_generator(models, cfg.generation)
     data_size = len(data_lines)
     all_results = []
-    lens = 0
     logger.info(f'Fairseq generate batch {batch_size}')
     start = time.perf_counter()
     for start_idx in tqdm(range(0, data_size, batch_size)):

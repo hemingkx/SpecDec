@@ -1,3 +1,0 @@
-block_plugins
-fairseq
-fairseq_cli
