@@ -216,7 +216,7 @@ class TranslationLevenshteinModifiedTask(TranslationTask):
             )
 
         return LanguagePairDataset(
-            src_tokens, src_lengths, self.source_dictionary, append_bos=True
+            src_tokens, src_lengths, self.source_dictionary, append_bos=False
         )
 
     def train_step(
