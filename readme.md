@@ -3,6 +3,13 @@
 Implementation for the paper [Lossless Speedup of Autoregressive Translation with
 Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 
+### Download model
+
+| Description | Model                                                        |
+| ----------- | ------------------------------------------------------------ |
+| wmt14.en-de | [at-verifier-base](https://drive.google.com/file/d/1L9z0Y5rked_tYn7Fllh-0VsRdgBHN1Mp/view?usp=sharing) |
+| wmt14.en-de | [nat-drafter-base (k=25)](https://drive.google.com/file/d/1fPYt1QGgIrNfk78XvGnrx_TeDRYePr2e/view?usp=sharing) |
+
 ### Requirements
 
 - Python >= 3.7
@@ -14,6 +21,24 @@ Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 conda create -n gad python=3.7
 cd GAD
 pip install --editable .
+```
+
+### Preprocess
+
+We release the bpe codes and our dict in `./data`.
+
+```
+text=PATH_YOUR_DATA
+src=source_language
+tgt=target_language
+
+model_path=PATH_TO_MODEL_DICT_DIR
+
+fairseq-preprocess --source-lang ${src} --target-lang ${tgt} \
+    --trainpref $text/train --validpref $text/valid --testpref $text/test \
+    --destdir PATH_TO_BIN_DIR --workers 60 \
+    --srcdict ${model_path}/dict.${src}.txt \
+    --tgtdict ${model_path}/dict.${tgt}.txt
 ```
 
 ### Train

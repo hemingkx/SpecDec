@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GEN=/fairseq/beam5_result_en_de.out # fairseq output file
+GEN=./output/beam5_result_en_de.out # a fairseq standard output file
 OUT=./output/block.out # GAD output file
 
 SYS=./output/block.out.compound.sys

@@ -1,12 +1,12 @@
-data_dir=./dict_dir # the dir that contains dict files
-checkpoint_path=./nat.pt # the dir that contains NAT drafter checkpoint
-AR_checkpoint_path=./at.pt # the dir that contains AT verifier checkpoint
+data_dir=./data # the dir that contains dict files
+checkpoint_path=./checkpoints/wmt14-en-de-base-nat-drafter-checkpoint.avg10.pt # the dir that contains NAT drafter checkpoint
+AR_checkpoint_path=./checkpoints/wmt14-en-de-base-at-verifier.pt # the dir that contains AT verifier checkpoint
 input_path=./test.en # the dir that contains bpe test files
 output_path=./output/block.out # the dir for outputs
 
 beta=5
 tau=3.0
-block_size=30
+block_size=25
 
 src=en
 tgt=de
