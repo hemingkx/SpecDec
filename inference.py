@@ -56,7 +56,7 @@ def fairseq_generate(data_lines, cfg, models, task, batch_size, device):
 
 
 @torch.no_grad()
-def baseline_generate(data_lines, model, task, device, no_use_logsoft=False, max_len=200):
+def baseline_generate(data_lines, model, task, device, max_len=200):
     # simplified AR greedy decoding
     src_dict = task.source_dictionary
     tgt_dict = task.target_dictionary
@@ -79,8 +79,7 @@ def baseline_generate(data_lines, model, task, device, no_use_logsoft=False, max
             pred_token = AR_forward_decoder(model,
                                             cur_input_tokens,
                                             encoder_out,
-                                            incremental_state,
-                                            use_log_softmax=not no_use_logsoft).item()
+                                            incremental_state).item()
             if pred_token == tgt_dict.eos():
                 break
             else:
