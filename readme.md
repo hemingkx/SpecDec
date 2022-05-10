@@ -7,8 +7,10 @@ Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 
 | Description | Model                                                        |
 | ----------- | ------------------------------------------------------------ |
-| wmt14.en-de | [at-verifier-base](https://drive.google.com/file/d/1L9z0Y5rked_tYn7Fllh-0VsRdgBHN1Mp/view?usp=sharing) |
-| wmt14.en-de | [nat-drafter-base (k=25)](https://drive.google.com/file/d/1fPYt1QGgIrNfk78XvGnrx_TeDRYePr2e/view?usp=sharing) |
+| wmt14.en-de | [at-verifier-base](https://drive.google.com/file/d/1L9z0Y5rked_tYn7Fllh-0VsRdgBHN1Mp/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1fPYt1QGgIrNfk78XvGnrx_TeDRYePr2e/view?usp=sharing) |
+| wmt14.de-en | [at-verifier-base](https://drive.google.com/file/d/1h5EdTEt2PMqvAqCq2G5bRhCeWk8LzwoG/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1IEX2K65rgv5SUHWxiowXYaS--Zqr3GvT/view?usp=sharing) |
+| wmt16.en-ro | [at-verifier-base](https://drive.google.com/file/d/1WocmZ9iw_OokYZY_BtzNAjGsgRXB-Aft/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1V_WbPRbgmIy-4oZDkws9mdFSw8n8KOGm/view?usp=sharing) |
+| wmt14.ro-en | [at-verifier-base](https://drive.google.com/file/d/1LWHC56HvTtvs58EMwoYMT6jKByuMW1dB/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1P21nU3u4WdJueEl4nqAY-cwUKAvzPu8A/view?usp=sharing) |
 
 ### Requirements
 
@@ -62,28 +64,20 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
 
 ### Inference
 
-For vanilla GAD  (check `inference.sh`):
+For GAD++   (check `inference.sh`, set `beta=1` for vanilla GAD):
 
 ```
-python inference.py $data_dir --path $checkpoint_path --user-dir block_plugins \
+python inference.py ${data_dir} --path ${checkpoint_path} --user-dir block_plugins \
     --task translation_lev_modified --remove-bpe --max-sentences 20 \
     --source-lang ${src} --target-lang ${tgt} --iter-decode-max-iter 0 \
     --iter-decode-eos-penalty 0 --iter-decode-with-beam 1 --gen-subset test \
-    --strategy ${strategy} --AR-path $AR_checkpoint_path --beam $BEAM \
-    --input-path $input_path --output-path $output_path --batch $BATCH \
-    --block-size ${block_size}
+    --AR-path ${AR_checkpoint_path} --input-path ${input_path} \
+    --output-path ${output_path} --block-size ${block_size} --beta ${beta} --tau ${tau} \
+    --batch ${batch} --beam ${beam} --strategy ${strategy}
 ```
 
-For GAD++ (with calculating the average decoding iteration and mean accepted tokens, check `pass_count.sh`)
-
-```
-python pass_count.py $data_dir --path $checkpoint_path --user-dir block_plugins \
-    --task translation_lev_modified --remove-bpe --max-sentences 20 \
-    --source-lang ${src} --target-lang ${tgt} --iter-decode-max-iter 0 \
-    --iter-decode-eos-penalty 0 --iter-decode-with-beam 1 --gen-subset test \
-    --AR-path $AR_checkpoint_path --input-path $input_path \
-    --output-path $output_path --block-size ${block_size} --beta ${beta} --tau ${tau}
-```
+> We test the inference latency of GAD with batch 1 implementation, check `inference_paper.py` for details.
+>
 
 Calculating compound split bleu:
 
