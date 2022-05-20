@@ -281,11 +281,11 @@ if __name__ == '__main__':
     if cmd_args.AR_path is not None:
         AR_models, _AR_model_args, _AR_model_task = load_model_ensemble_and_task(filenames=[cmd_args.AR_path],
                                                                                  arg_overrides={'data': cfg.task.data})
-        AR_model = AR_models[0].to(device).eval()
         if cfg.common.fp16:
             logging.info("AR fp16 enabled!")
             for AR_model in AR_models:
                 AR_model.half()
+        AR_model = AR_models[0].to(device).eval()
         logging.info("AR model loaded!")
 
     with open(cmd_args.input_path, 'r') as f:
