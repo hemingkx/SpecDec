@@ -19,5 +19,5 @@ python train.py ${bin_path} --arch block \
     --seed ${seed} --clip-norm 5 --save-dir ./checkpoints \
     --src-embedding-copy --log-interval 1000 --user-dir block_plugins --block-size ${size} --total-up ${update} \
     --update-freq ${update_freq} --decoder-learned-pos --encoder-learned-pos --apply-bert-init --activation-fn gelu \
-	--restore-file ./checkpoints/initial_checkpoint.pt \
+    --restore-file ./checkpoints/initial_checkpoint.pt \
     --reset-optimizer --reset-meters --reset-lr-scheduler --reset-dataloader
