@@ -1,11 +1,12 @@
 # Generalized Aggressive Decoding
 
-Implementation for the paper [Lossless Speedup of Autoregressive Translation with
-Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
+## Introduction
+
+This repository contains all the code and checkpoints used to reimplement our paper: [Lossless Speedup of Autoregressive Translation with Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 
 ![GAD](./GAD.gif)
 
-### Download model
+## Download model
 
 | Description | Model                                                        |
 | ----------- | ------------------------------------------------------------ |
@@ -14,12 +15,12 @@ Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
 | wmt16.en-ro | [at-verifier-base](https://drive.google.com/file/d/1WocmZ9iw_OokYZY_BtzNAjGsgRXB-Aft/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1V_WbPRbgmIy-4oZDkws9mdFSw8n8KOGm/view?usp=sharing) |
 | wmt16.ro-en | [at-verifier-base](https://drive.google.com/file/d/1LWHC56HvTtvs58EMwoYMT6jKByuMW1dB/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1P21nU3u4WdJueEl4nqAY-cwUKAvzPu8A/view?usp=sharing) |
 
-### Requirements
+## Requirements
 
 - Python >= 3.7
 - Pytorch >= 1.5.0
 
-### Installation
+## Installation
 
 ```
 conda create -n gad python=3.7
@@ -27,9 +28,9 @@ cd GAD
 pip install --editable .
 ```
 
-### Preprocess
+## Preprocess
 
-We release the bpe codes and our dict in `./data`.
+We release the bpe codes and our dicts in `./data`.
 
 ```
 text=PATH_YOUR_DATA
@@ -45,7 +46,15 @@ fairseq-preprocess --source-lang ${src} --target-lang ${tgt} \
     --tgtdict ${model_path}/dict.${tgt}.txt
 ```
 
-### Train
+## Encoder Initialization
+
+We recommend using the AT verifier's encoder to initialize the weights of the NAT drafter. For preparing the initialization checkpoints:
+
+```
+python encoder_initial.py
+```
+
+## Train
 
 For training the NAT drafter of GAD (check `train.sh`)
 
@@ -61,10 +70,12 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
     --save-dir ./checkpoints --src-embedding-copy --log-interval 1000 \
     --user-dir block_plugins --block-size ${size} --total-up ${update} \
     --update-freq ${update_freq} --decoder-learned-pos --encoder-learned-pos \
-    --apply-bert-init --activation-fn gelu
+    --apply-bert-init --activation-fn gelu \
+    --restore-file ./checkpoints/initial_checkpoint.pt \
+    --reset-optimizer --reset-meters --reset-lr-scheduler --reset-dataloader
 ```
 
-### Inference
+## Inference
 
 For GAD++   (check `inference.sh`, set `beta=1` for vanilla GAD):
 
@@ -87,7 +98,7 @@ Calculating compound split bleu:
 ./ref.sh
 ```
 
-### Note
+## Note
 
 This code is based on GLAT [(https://github.com/FLC777/GLAT)](https://github.com/FLC777/GLAT). 
 
