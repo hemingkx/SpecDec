@@ -48,11 +48,7 @@ fairseq-preprocess --source-lang ${src} --target-lang ${tgt} \
 
 ## Encoder Initialization
 
-We recommend using the AT verifier's encoder to initialize the weights of the NAT drafter. For preparing the initialization checkpoints:
-
-```
-python encoder_initial.py
-```
+We recommend using the AT verifier's encoder to initialize the weights of the NAT drafter. For preparing the initialization checkpoints, check `encoder_initial.py`.
 
 ## Train
 
@@ -74,6 +70,18 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
     --restore-file ./checkpoints/initial_checkpoint.pt \
     --reset-optimizer --reset-meters --reset-lr-scheduler --reset-dataloader
 ```
+
+## Hyperparameters
+
+| Hyperparameters \ Dataset | WMT14 EN-DE | WMT16 EN-RO |
+| ------------------------- | :---------: | :---------: |
+| learning rate             |   0.0005    |    0.001    |
+| dropout                   |     0.1     |     0.2     |
+| warm up                   |    10000    |    4000     |
+| max update                |    300K     |     50K     |
+| batch size (tokens)       |    128K     |     64K     |
+
+> the effective batch size of tokens is calculated by GPU_NUM * MAX_TOKENS * UPDATE-FREQ.
 
 ## Inference
 
