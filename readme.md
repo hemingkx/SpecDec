@@ -73,15 +73,15 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
 
 ## Hyperparameters
 
-| Hyperparameters \ Dataset | WMT14 EN-DE | WMT16 EN-RO |
-| ------------------------- | :---------: | :---------: |
-| learning rate             |   0.0005    |    0.001    |
-| dropout                   |     0.1     |     0.2     |
-| warm up                   |    10000    |    4000     |
-| max update                |    300K     |     50K     |
-| batch size (tokens)       |    128K     |     64K     |
+| Hyperparameters \ Datasets | WMT14 EN-DE | WMT16 EN-RO |
+| -------------------------- | :---------: | :---------: |
+| learning rate              |   0.0005    |    0.001    |
+| dropout                    |     0.1     |     0.2     |
+| warm up                    |    10000    |    4000     |
+| max update                 |    300K     |     50K     |
+| batch size (tokens)        |    128K     |     64K     |
 
-> the effective batch size of tokens is calculated by GPU_NUM * MAX_TOKENS * UPDATE-FREQ.
+> the effective batch size of tokens is calculated by GPU_NUM * MAX_TOKENS * UPDATE_FREQ.
 
 ## Inference
 
