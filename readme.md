@@ -106,7 +106,34 @@ Calculating compound split bleu:
 ./ref.sh
 ```
 
+## Example
+
+We put the first three tokenized sentences of WMT14.EN-DE in `data/wmt14.en-de/example.en`. Put this file in the `input_path` of the inference script. The results below were obtained by running  `inference.sh` with  `inference_paper.py` (on 1 Nvidia P100 GPU, Pytorch 1.10, CUDA 11).
+
+| Model           | Accepted Tokens (average) | Latency (s) |
+| --------------- | :-----------------------: | :---------: |
+| Fairseq (beam5) |           1.00            |    0.83     |
+| Fairseq (beam1) |           1.00            |    0.81     |
+| vanilla GAD     |           3.55            |    0.44     |
+| GAD++           |           6.18            |    0.27     |
+
+You can find the translation results in `./output`.
+
 ## Note
 
 This code is based on GLAT [(https://github.com/FLC777/GLAT)](https://github.com/FLC777/GLAT). 
+
+## Citation
+
+If you find the resources in this repository useful, please cite our paper:
+
+```
+@article{Xia2022GAD,
+	title = {Lossless Speedup of Autoregressive Translation with Generalized Aggressive Decoding},
+	journal = {ArXiv},
+	author = {Xia, Heming and Ge, Tao and Wei, Furu and Sui, Zhifang},
+	year = {2022},
+	note = {arXiv: 2203.16487}
+}
+```
 
