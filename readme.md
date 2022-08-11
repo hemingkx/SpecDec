@@ -52,7 +52,27 @@ We recommend using the AT verifier's encoder to initialize the weights of the NA
 
 ## Train
 
-For training the NAT drafter of GAD (check `train.sh`)
+**The AT verifier** of GAD is a standard Transformer that can be trained with [fairseq](https://github.com/facebookresearch/fairseq/tree/main/examples/translation):
+
+```
+fairseq-train ${bin_path} --arch transformer --share-all-embeddings \
+      --task translation --source-lang ${src} --target-lang ${tgt} \
+      --criterion label_smoothed_cross_entropy --dropout ${dropout} \
+      --label-smoothing 0.1 --lr ${lr} --clip-norm 3.0 \
+      --warmup-init-lr 1e-7 --min-lr 1e-9 --lr-scheduler inverse_sqrt \
+      --weight-decay 0.00001 --update-freq ${update_freq} --fp16 --seed ${seed} \
+      --warmup-updates ${warmup} --optimizer adam \
+      --adam-betas '(0.9, 0.98)' --max-tokens ${max_tokens} --max-epoch ${max_epoch} \
+      --save-dir ./checkpoints \
+      --eval-bleu \
+      --eval-bleu-args '{"beam":5}' \
+      --eval-bleu-detok moses \
+      --eval-bleu-remove-bpe \
+      --eval-bleu-print-samples \
+      --best-checkpoint-metric bleu --maximize-best-checkpoint-metric
+```
+
+For training **the NAT drafter** of GAD (check `train.sh`):
 
 ```
 python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddings \
@@ -72,6 +92,8 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
 ```
 
 ## Hyperparameters
+
+The hyperparameters of the NAT drafter are shown as follows:
 
 | Hyperparameters \ Datasets | WMT14 EN-DE | WMT16 EN-RO |
 | -------------------------- | :---------: | :---------: |
