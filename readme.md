@@ -30,7 +30,7 @@ pip install --editable .
 
 ## Preprocess
 
-We release the bpe codes and our dicts in `./data`.
+The datasets we used can be obtained following the script released by [Mask-Predict](https://github.com/facebookresearch/Mask-Predict/blob/main/get_data.sh). We release the bpe codes and our dicts in `./data`.  The tokenized datasets are preprocessed as follows:
 
 ```
 text=PATH_YOUR_DATA
