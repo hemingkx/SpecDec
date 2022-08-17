@@ -33,15 +33,16 @@ pip install --editable .
 The datasets we used can be obtained following the script released by [Mask-Predict](https://github.com/facebookresearch/Mask-Predict/blob/main/get_data.sh). We release the bpe codes and our dicts in `./data`.  The tokenized datasets are preprocessed as follows:
 
 ```
-text=PATH_YOUR_DATA
+text=PATH_TO_YOUR_DATA
 src=source_language
 tgt=target_language
+bin_path=PATH_TO_BIN_DIR
 
 model_path=PATH_TO_MODEL_DICT_DIR
 
 fairseq-preprocess --source-lang ${src} --target-lang ${tgt} \
     --trainpref $text/train --validpref $text/valid --testpref $text/test \
-    --destdir PATH_TO_BIN_DIR --workers 60 \
+    --destdir ${bin_path} --workers 60 \
     --srcdict ${model_path}/dict.${src}.txt \
     --tgtdict ${model_path}/dict.${tgt}.txt
 ```
