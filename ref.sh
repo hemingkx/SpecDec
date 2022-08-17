@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GEN=./output/beam5_result_en_de.out # a fairseq standard output file
+GEN=./output/beam5_result_en_de.out # a fairseq standard output file via command 'fairseq-generate ./binary-data-path --path ./at-verifier.pt --gen-subset test --beam 5 --remove-bpe > ./output/beam5_result_en_de.out'
 OUT=./output/block.out # GAD output file
 
 SYS=./output/block.out.compound.sys
