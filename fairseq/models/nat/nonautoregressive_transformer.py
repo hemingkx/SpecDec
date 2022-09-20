@@ -135,12 +135,15 @@ class NATransformerDecoder(FairseqNATDecoder):
             self.copy_attn = torch.nn.Linear(self.embed_dim, self.embed_dim, bias=False)
 
     @ensemble_decoder
-    def forward(self, normalize, encoder_out, prev_output_tokens, step=0, **unused):
+    def forward(self, normalize, encoder_out, prev_output_tokens, step=0, block_mask=None, **unused):
         features, _ = self.extract_features(
             prev_output_tokens,
             encoder_out=encoder_out,
             embedding_copy=(step == 0) & self.src_embedding_copy,
         )
+        batch_size = features.size(0)
+        model_dim = features.size(-1)
+        features = features[block_mask].view(batch_size, -1, model_dim)  # only keep the block results
         decoder_out = self.output_layer(features)
         return F.log_softmax(decoder_out, -1) if normalize else decoder_out
 

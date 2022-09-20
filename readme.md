@@ -6,6 +6,10 @@ This repository contains all the code and checkpoints used to reimplement our pa
 
 ![GAD](./GAD.gif)
 
+## News
+
+- 2022.09.20 Update💥:  the memory cost of GAD is optimized. Now you can obtain **3x~5x speedup** using GAD with only **~300MiB of extra memory cost** (~240 MiB for model states), compared to Transformer's greedy decoding.
+
 ## Download model
 
 | Description | Model                                                        |
@@ -131,7 +135,7 @@ Calculating compound split bleu:
 
 ## Example
 
-We put the first three tokenized sentences of WMT14.EN-DE in `data/wmt14.en-de/example.en`. Put this file in the `input_path` of the inference script. The results below were obtained by running  `inference.sh` with  `inference_paper.py` (on 1 Nvidia P100 GPU, Pytorch 1.10, CUDA 11).
+We put the first three tokenized sentences of WMT14 EN-DE in `data/wmt14.en-de/example.en`. Put this file in the `input_path` of the inference script. The results below were obtained by running  `inference.sh` with  `inference_paper.py` (on 1 Nvidia P100 GPU, Pytorch 1.10, CUDA 11).
 
 | Model           | Accepted Tokens (average) | Latency (s) |
 | --------------- | :-----------------------: | :---------: |
@@ -141,6 +145,16 @@ We put the first three tokenized sentences of WMT14.EN-DE in `data/wmt14.en-de/e
 | GAD++           |           6.18            |    0.27     |
 
 You can find the translation results in `./output`.
+
+## Extra Memory Cost
+
+Since there is no need to save intermediate variables during inference, GAD can achieve **3x~5x decoding speedup** (by alternating NAT and AT decoding) with only **~300MiB of extra memory cost**. Below is the `nvidia-smi` memory cost comparison of AT and GAD, tested on WMT14 EN-DE:
+
+| Model \ Batch Size | Model States (Params) |  1   |  4   |  8   |  16  |  32  |
+| ------------------ | :-------------------: | :--: | :--: | :--: | :--: | :--: |
+| Fairseq (beam1)    |        232.38         | 1670 | 1712 | 1758 | 1844 | 2028 |
+| GAD++              |   469.75 (AT + NAT)   | 1902 | 1938 | 2012 | 2108 | 2298 |
+| Extra Memory       |     237.38 (NAT)      | 232  | 226  | 254  | 264  | 270  |
 
 ## Note
 

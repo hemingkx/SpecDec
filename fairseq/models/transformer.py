@@ -739,7 +739,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
         alignment_heads: Optional[int] = None,
         src_lengths: Optional[Any] = None,
         return_all_hiddens: bool = False,
-        parallel_forward_start_pos: Optional[int] = None
+        parallel_forward_start_pos: Optional[int] = None,
+        block_mask=None
     ):
         """
         Args:
@@ -768,6 +769,10 @@ class TransformerDecoder(FairseqIncrementalDecoder):
             alignment_heads=alignment_heads,
             parallel_forward_start_pos=parallel_forward_start_pos
         )
+        if block_mask is not None:
+            batch_size = x.size(0)
+            model_dim = x.size(-1)
+            x = x[block_mask].view(batch_size, -1, model_dim)
         if not features_only:
             x = self.output_layer(x)
         return x, extra

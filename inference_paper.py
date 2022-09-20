@@ -106,6 +106,7 @@ def baseline_generate(data_lines, model, task, device, max_len=200):
     return remove_bpe_results, delta
 
 
+@torch.no_grad()
 def cut_incremental_state(incremental_state, keep_len, encoder_state_ids):
     for n in incremental_state:
         if n[: n.index('.')] in encoder_state_ids:
@@ -124,13 +125,15 @@ def forward_decoder(model,
                     encoder_out: Dict[str, List[Tensor]],
                     incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
                     parallel_forward_start_pos=None,
+                    block_mask=None,
                     temperature: float = 1.0,
                     beta: int = 1,
                     tau: float = 0.0):
     decoder_out = model.decoder.forward(input_tokens,
                                         encoder_out=encoder_out,
                                         incremental_state=incremental_state,
-                                        parallel_forward_start_pos=parallel_forward_start_pos)
+                                        parallel_forward_start_pos=parallel_forward_start_pos,
+                                        block_mask=block_mask)
     decoder_out_tuple = (decoder_out[0].div_(temperature), decoder_out[1])
     topk_scores, indexes = torch.topk(decoder_out_tuple[0], beta, dim=-1)
     topk_scores = topk_scores[0].tolist()
@@ -142,6 +145,7 @@ def forward_decoder(model,
     return indexes
 
 
+@torch.no_grad()
 def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, tau=0, max_len=200):
     # Generalized Aggressive Decoding
     src_dict = task.source_dictionary
@@ -199,16 +203,20 @@ def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, 
     return remove_bpe_results, delta
 
 
+@torch.no_grad()
 def gad_forward(incremental_state, encoder_state_ids, start_pos, block_size, tgt_dict, prev_output_tokens,
                 encoder_out, AR_encoder_out, model, AR_model, beta, tau, max_len=200):
     output_tokens = torch.tensor([prev_output_tokens]).to(device)
+    block_mask = torch.zeros_like(output_tokens).to(output_tokens)
+    block_mask[0][start_pos:start_pos + block_size] = 1
     _scores, _tokens = model.decoder(
         normalize=False,
         prev_output_tokens=output_tokens,
         encoder_out=encoder_out,
+        block_mask=block_mask.bool(),
     ).max(-1)
 
-    prev_output_tokens[start_pos:start_pos + block_size] = _tokens[0].tolist()[start_pos:start_pos + block_size]
+    prev_output_tokens[start_pos:start_pos + block_size] = _tokens[0].tolist()
 
     cut_incremental_state(incremental_state, keep_len=start_pos, encoder_state_ids=encoder_state_ids)
     cur_span_input_tokens = torch.tensor([[tgt_dict.eos()] + prev_output_tokens]).to(device)

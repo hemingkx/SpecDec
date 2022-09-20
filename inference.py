@@ -123,11 +123,12 @@ def baseline_generate(data_lines, model, task, batch_size, device, max_len=200):
 
 @torch.no_grad()
 def forward_decoder(model, input_tokens, encoder_out, incremental_state=None,
-                    parallel_forward_start_pos=None, temperature=1.0, beta=1, tau=0.0):
+                    parallel_forward_start_pos=None, block_mask=None, temperature=1.0, beta=1, tau=0.0):
     decoder_out = model.decoder.forward(input_tokens,
                                         encoder_out=encoder_out,
                                         incremental_state=incremental_state,
-                                        parallel_forward_start_pos=parallel_forward_start_pos)
+                                        parallel_forward_start_pos=parallel_forward_start_pos,
+                                        block_mask=block_mask)
     decoder_out_tuple = (decoder_out[0].div_(temperature), decoder_out[1])
     topk_scores, indexes = torch.topk(decoder_out_tuple[0], beta, dim=-1)
     topk_scores_list = topk_scores.tolist()
@@ -140,6 +141,7 @@ def forward_decoder(model, input_tokens, encoder_out, incremental_state=None,
     return indexes_list
 
 
+@torch.no_grad()
 def gad_generate(data_lines, model, AR_model, task, block_size, batch_size, device, beta=1, tau=0, max_len=200):
     # Generalized Aggressive Decoding
     src_dict = task.source_dictionary
@@ -184,6 +186,7 @@ def gad_generate(data_lines, model, AR_model, task, block_size, batch_size, devi
     return remove_bpe_results, delta
 
 
+@torch.no_grad()
 def gad_forward(start_pos_list, block_size, batch_size, tgt_dict, prev_output_tokens,
                 encoder_out, AR_encoder_out, model, AR_model, beta, tau, max_len=200):
     pad_tokens = [[tgt_dict.pad()] * (max_len + block_size) for _ in range(batch_size)]
@@ -191,36 +194,49 @@ def gad_forward(start_pos_list, block_size, batch_size, tgt_dict, prev_output_to
         pad_tokens[i][:len(prev_output_tokens[i])] = prev_output_tokens[i]
     output_tokens = torch.tensor(pad_tokens).to(device)
     output_tokens = output_tokens[:, : output_tokens.ne(tgt_dict.pad()).sum(1).max()]
+    block_mask = torch.zeros_like(output_tokens).to(output_tokens)
+    for i, start_pos in enumerate(start_pos_list):
+        if start_pos == -1:
+            block_mask[i][-block_size:] = 1
+        else:
+            block_mask[i][start_pos:start_pos + block_size] = 1
 
     _, tensor_tokens = model.decoder(
         normalize=False,
         prev_output_tokens=output_tokens,
         encoder_out=encoder_out,
+        block_mask=block_mask.bool(),
     ).max(-1)
 
     _tokens = tensor_tokens.tolist()
     for i, start_pos in enumerate(start_pos_list):
         if start_pos_list[i] != -1:
-            output_tokens[i, start_pos:start_pos + block_size] = tensor_tokens[i, start_pos:start_pos + block_size]
-            prev_output_tokens[i][start_pos:start_pos + block_size] = _tokens[i][start_pos:start_pos + block_size]
+            output_tokens[i, start_pos:start_pos + block_size] = tensor_tokens[i]
+            prev_output_tokens[i][start_pos:start_pos + block_size] = _tokens[i]
 
     append_eos = torch.tensor([[tgt_dict.eos()] for _ in range(batch_size)]).to(device)
     cur_span_input_tokens = torch.cat((append_eos, output_tokens), dim=-1)
+    block_mask = torch.zeros_like(cur_span_input_tokens).to(cur_span_input_tokens)
+    for i, start_pos in enumerate(start_pos_list):
+        if start_pos == -1:
+            block_mask[i][-block_size - 1:] = 1
+        else:
+            block_mask[i][start_pos:start_pos + block_size + 1] = 1
 
-    AR_verify_tokens = forward_decoder(AR_model, cur_span_input_tokens, AR_encoder_out, beta=beta, tau=tau)
+    AR_verify_tokens = forward_decoder(AR_model, cur_span_input_tokens, AR_encoder_out,
+                                       block_mask=block_mask.bool(), beta=beta, tau=tau)
 
     next_output_tokens = prev_output_tokens.copy()
     for i in range(batch_size):
         if start_pos_list[i] != -1:
             bifurcation = block_size
             for j, (token, AR_verify_token) in enumerate(
-                    zip(prev_output_tokens[i][start_pos_list[i]:], AR_verify_tokens[i][start_pos_list[i]:-1])):
+                    zip(prev_output_tokens[i][start_pos_list[i]:], AR_verify_tokens[i][:-1])):
                 if token not in AR_verify_token:
                     bifurcation = j
                     break
             next_output_tokens[i] = prev_output_tokens[i][:start_pos_list[i] + bifurcation] + \
-                                    [AR_verify_tokens[i][start_pos_list[i] + bifurcation][0]] + \
-                                    [tgt_dict.unk()] * block_size
+                                    [AR_verify_tokens[i][bifurcation][0]] + [tgt_dict.unk()] * block_size
 
             find_eos = False
             for j, o in enumerate(next_output_tokens[i][start_pos_list[i]:start_pos_list[i] + bifurcation + 1]):
