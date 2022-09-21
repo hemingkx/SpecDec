@@ -99,19 +99,25 @@ class BARTHubInterface(GeneratorHubInterface):
         if "prefix_tokens" in inference_step_args:
             raise NotImplementedError("prefix generation not implemented for BART")
         res = []
+        results = []
         for batch in self._build_batches(tokenized_sentences, skip_invalid_size_inputs):
             src_tokens = batch['net_input']['src_tokens']
+            """
+            # delete these lines for GAD fairseq baseline implementation
             inference_step_args["prefix_tokens"] =src_tokens.new_full(
                 (src_tokens.size(0), 1), fill_value=self.task.source_dictionary.bos()
             ).to(device=self.device)
-            results = super().generate(
+            """
+            translations = super().generate(
                 src_tokens,
                 *args,
                 inference_step_args=inference_step_args,
                 skip_invalid_size_inputs=skip_invalid_size_inputs,
                 **kwargs
             )
-            res.extend(results)
+            for id, hypos in zip(batch["id"].tolist(), translations):
+                results.append((id, hypos))
+            res = [hypos for _, hypos in sorted(results, key=lambda x: x[0])]
         return res
 
     def extract_features(
