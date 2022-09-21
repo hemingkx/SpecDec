@@ -9,6 +9,7 @@ This repository contains all the code and checkpoints used to reimplement our pa
 ## News
 
 - 2022.09.20 Update💥:  the memory cost of GAD is optimized. Now you can obtain **3x~5x speedup** using GAD with only **~300MiB of extra memory cost** (~240 MiB for model states), compared to Transformer's greedy decoding.
+- 2022.09.21 Update💥:  the inference codes for the summarization task are released.
 
 ## Download model
 
