@@ -277,32 +277,29 @@ if __name__ == '__main__':
 
     task = tasks.setup_task(cfg.task)
 
-    # NAR drafter
-    logger.info("loading model(s) from {}".format(cfg.common_eval.path))
-    models, _model_args, _model_task = load_model_ensemble_and_task(filenames=[cfg.common_eval.path], task=task)
-
     if cmd_args.cpu:
         device = torch.device('cpu')
     else:
         device = torch.device('cuda')
-    model = models[0].to(device).eval()
-    if cfg.common.fp16:
-        logging.info("NAR fp16 enabled!")
-        model.half()
+
+    # NAR drafter
+    if cmd_args.strategy == 'gad':
+        logger.info("loading model(s) from {}".format(cfg.common_eval.path))
+        models, _model_args, _model_task = load_model_ensemble_and_task(filenames=[cfg.common_eval.path], task=task)
+        model = models[0].to(device).eval()
+        if cfg.common.fp16:
+            logging.info("NAR fp16 enabled!")
+            model.half()
 
     # AR verifier
-    AR_model = None
-    AR_models = None
-    _AR_model_task = None
-    if cmd_args.AR_path is not None:
-        AR_models, _AR_model_args, _AR_model_task = load_model_ensemble_and_task(filenames=[cmd_args.AR_path],
-                                                                                 arg_overrides={'data': cfg.task.data})
-        if cfg.common.fp16:
-            logging.info("AR fp16 enabled!")
-            for AR_model in AR_models:
-                AR_model.half()
-        AR_model = AR_models[0].to(device).eval()
-        logging.info("AR model loaded!")
+    AR_models, _AR_model_args, _AR_model_task = load_model_ensemble_and_task(filenames=[cmd_args.AR_path],
+                                                                             arg_overrides={'data': cfg.task.data})
+    if cfg.common.fp16:
+        logging.info("AR fp16 enabled!")
+        for AR_model in AR_models:
+            AR_model.half()
+    AR_model = AR_models[0].to(device).eval()
+    logging.info("AR model loaded!")
 
     with open(cmd_args.input_path, 'r') as f:
         bpe_sents = [l.strip() for l in f.readlines()]
