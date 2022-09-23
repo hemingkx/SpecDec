@@ -127,6 +127,7 @@ python inference.py ${data_dir} --path ${checkpoint_path} --user-dir block_plugi
 
 > We test the inference latency of GAD with batch 1 implementation, check `inference_paper.py` for details.
 >
+> check `inference_drafter.py` for inference with our NAT drafter only.
 
 Calculating compound split bleu:
 
