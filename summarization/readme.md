@@ -11,9 +11,16 @@ This folder contains the codes and checkpoints of GAD on the summarization task 
 | Model       | [at-verifier-base](https://drive.google.com/file/d/1Kp8W89QjjSC7JbxgxQLkPW6jaczw18Ct/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1JvRNV4QsoWpVs1bHiozeJb8kRnln4x1K/view?usp=sharing) |
 | Test Data   | [cnn-dm-test](https://drive.google.com/drive/folders/1eZON9kb5Ga2bHN0_v24Q1BsopWVTZDFL?usp=sharing) |
 
+## Installation
+
+```
+conda activate gad
+pip install requests # to download BART encoder.json
+```
+
 ## Preprocess
 
-The raw datasets we used can be obtained following [Fairseq-Summarization](https://github.com/facebookresearch/fairseq/blob/main/examples/bart/README.summarization.md). We release our dicts in `./data` and our raw test data above. Same as the translation task, you need to prepare the distilled data with a trained autoregressive Transformer. 
+The raw datasets we used can be obtained following [Fairseq-Summarization](https://github.com/facebookresearch/fairseq/blob/main/examples/bart/README.summarization.md). We release our dicts in `./data` and our raw test data above. Same as the translation task, you need to prepare the distilled data with a trained autoregressive Transformer before training. As for inference, you can directly test the model's performance with our provided raw test data. 
 
 ## Finetune
 

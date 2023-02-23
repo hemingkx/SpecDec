@@ -1,4 +1,4 @@
-data_dir=./data # the dir that contains dict files
+data_dir=/home/hemingkx/GAD/summarization/data # the dir that contains dict files, please use absolute path here
 checkpoint_path=./checkpoints/cnn-dm-base-nat-drafter-checkpoint.avg10.pt # the dir that contains NAT drafter checkpoint
 AR_checkpoint_path=./checkpoints/cnn-dm-base-at-verifier.pt # the dir that contains AT verifier checkpoint
 input_path=./data/test.source # the dir that contains raw test files
