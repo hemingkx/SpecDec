@@ -2,7 +2,7 @@ import torch
 
 
 def model_preparing(model_path, save_path):
-    """only save the AT encoder params to initialize the NAT drafter's encoder"""
+    """only save the AR encoder params to initialize the NAR drafter's encoder"""
     key_l = []
     raw_model = torch.load(model_path)
     for key in raw_model['model']:
@@ -17,7 +17,7 @@ def model_preparing(model_path, save_path):
 
 
 def param_checking(model1, model2):
-    """check the parameters of the AT verifier and the NAT drafter"""
+    """check the parameters of the AR verifier and the NAR drafter"""
     key_l1 = []
     key_l2 = []
     raw_model1 = torch.load(model1)
@@ -37,6 +37,6 @@ def param_checking(model1, model2):
 
 
 if __name__ == "__main__":
-    AR_path = './checkpoints/wmt14-en-de-base-at-verifier.pt'  # the dir that contains AT verifier checkpoint
-    save_path = './checkpoints/initial_checkpoint.pt'  # the save dir of your fairseq NAT drafter checkpoints
+    AR_path = './checkpoints/wmt14-en-de-base-at-verifier.pt'  # the dir that contains AR verifier checkpoint
+    save_path = './checkpoints/initial_checkpoint.pt'  # the save dir of your fairseq NAR drafter checkpoints
     model_preparing(AR_path, save_path)

@@ -1,24 +1,19 @@
-# Generalized Aggressive Decoding
+# Speculative Decoding
 
 ## Introduction
 
-This repository contains all the code and checkpoints used to reimplement our paper: [Lossless Speedup of Autoregressive Translation with Generalized Aggressive Decoding](https://arxiv.org/pdf/2203.16487.pdf).
+This repository contains the code used to reimplement our paper: [Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation](https://arxiv.org/pdf/2203.16487.pdf).
 
-![GAD](./GAD.gif)
-
-## News
-
-- 2022.09.20 Update💥:  the memory cost of GAD is optimized. Now you can obtain **3x~5x speedup** using GAD with only **~300MiB of extra memory cost** (~240 MiB for model states), compared to Transformer's greedy decoding.
-- 2022.09.21 Update💥:  the inference codes for the summarization task are released.
+![SpecDec](./SpecDec.gif)
 
 ## Download model
 
 | Description | Model                                                        |
 | ----------- | ------------------------------------------------------------ |
-| wmt14.en-de | [at-verifier-base](https://drive.google.com/file/d/1L9z0Y5rked_tYn7Fllh-0VsRdgBHN1Mp/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1fPYt1QGgIrNfk78XvGnrx_TeDRYePr2e/view?usp=sharing) |
-| wmt14.de-en | [at-verifier-base](https://drive.google.com/file/d/1h5EdTEt2PMqvAqCq2G5bRhCeWk8LzwoG/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1IEX2K65rgv5SUHWxiowXYaS--Zqr3GvT/view?usp=sharing) |
-| wmt16.en-ro | [at-verifier-base](https://drive.google.com/file/d/1WocmZ9iw_OokYZY_BtzNAjGsgRXB-Aft/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1V_WbPRbgmIy-4oZDkws9mdFSw8n8KOGm/view?usp=sharing) |
-| wmt16.ro-en | [at-verifier-base](https://drive.google.com/file/d/1LWHC56HvTtvs58EMwoYMT6jKByuMW1dB/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1P21nU3u4WdJueEl4nqAY-cwUKAvzPu8A/view?usp=sharing) |
+| wmt14.en-de | [ar-verifier-base](https://drive.google.com/file/d/1L9z0Y5rked_tYn7Fllh-0VsRdgBHN1Mp/view?usp=sharing)， [nar-drafter-base (k=25)](https://drive.google.com/file/d/1fPYt1QGgIrNfk78XvGnrx_TeDRYePr2e/view?usp=sharing) |
+| wmt14.de-en | [ar-verifier-base](https://drive.google.com/file/d/1h5EdTEt2PMqvAqCq2G5bRhCeWk8LzwoG/view?usp=sharing)， [nar-drafter-base (k=25)](https://drive.google.com/file/d/1IEX2K65rgv5SUHWxiowXYaS--Zqr3GvT/view?usp=sharing) |
+| wmt16.en-ro | [ar-verifier-base](https://drive.google.com/file/d/1WocmZ9iw_OokYZY_BtzNAjGsgRXB-Aft/view?usp=sharing)， [nar-drafter-base (k=25)](https://drive.google.com/file/d/1V_WbPRbgmIy-4oZDkws9mdFSw8n8KOGm/view?usp=sharing) |
+| wmt16.ro-en | [ar-verifier-base](https://drive.google.com/file/d/1LWHC56HvTtvs58EMwoYMT6jKByuMW1dB/view?usp=sharing)， [nar-drafter-base (k=25)](https://drive.google.com/file/d/1P21nU3u4WdJueEl4nqAY-cwUKAvzPu8A/view?usp=sharing) |
 
 ## Requirements
 
@@ -28,8 +23,8 @@ This repository contains all the code and checkpoints used to reimplement our pa
 ## Installation
 
 ```
-conda create -n gad python=3.7
-cd GAD
+conda create -n specdec python=3.7
+cd SpecDec
 pip install --editable .
 ```
 
@@ -54,11 +49,11 @@ fairseq-preprocess --source-lang ${src} --target-lang ${tgt} \
 
 ## Encoder Initialization
 
-We recommend using the AT verifier's encoder to initialize the weights of the NAT drafter. For preparing the initialization checkpoints, check `encoder_initial.py`.
+We recommend using the AR verifier's encoder to initialize the weights of the NAR drafter. For preparing the initialization checkpoints, check `encoder_initial.py`.
 
 ## Train
 
-**The AT verifier** of GAD is a standard Transformer that can be trained with [fairseq](https://github.com/facebookresearch/fairseq/tree/main/examples/translation):
+**The AR verifier** of SpecDec is a standard Transformer that can be trained with [fairseq](https://github.com/facebookresearch/fairseq/tree/main/examples/translation):
 
 ```
 fairseq-train ${bin_path} --arch transformer --share-all-embeddings \
@@ -78,7 +73,7 @@ fairseq-train ${bin_path} --arch transformer --share-all-embeddings \
       --best-checkpoint-metric bleu --maximize-best-checkpoint-metric
 ```
 
-For training **the NAT drafter** of GAD (check `train.sh`):
+For training **the NAR drafter** of SpecDec (check `train.sh`):
 
 ```
 python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddings \
@@ -90,7 +85,7 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
     --decoder-embed-dim 512 --fp16 --max-source-positions 1000 \
     --max-target-positions 1000 --max-update ${update} --seed ${seed} --clip-norm 5 \
     --save-dir ./checkpoints --src-embedding-copy --log-interval 1000 \
-    --user-dir block_plugins --block-size ${size} --total-up ${update} \
+    --user-dir specdec_plugins --block-size ${size} --total-up ${update} \
     --update-freq ${update_freq} --decoder-learned-pos --encoder-learned-pos \
     --apply-bert-init --activation-fn gelu \
     --restore-file ./checkpoints/initial_checkpoint.pt \
@@ -99,7 +94,7 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
 
 ## Hyperparameters
 
-The hyperparameters of the NAT drafter are shown as follows:
+The hyperparameters of the NAR drafter are shown as follows:
 
 | Hyperparameters \ Datasets | WMT14 EN-DE | WMT16 EN-RO |
 | -------------------------- | :---------: | :---------: |
@@ -113,10 +108,10 @@ The hyperparameters of the NAT drafter are shown as follows:
 
 ## Inference
 
-For GAD++   (check `inference.sh`, set `beta=1` for vanilla GAD):
+For SpecDec   (check `inference.sh`, set `beta=1` for identical results to AR greedy decoding):
 
 ```
-python inference.py ${data_dir} --path ${checkpoint_path} --user-dir block_plugins \
+python inference.py ${data_dir} --path ${checkpoint_path} --user-dir specdec_plugins \
     --task translation_lev_modified --remove-bpe --max-sentences 20 \
     --source-lang ${src} --target-lang ${tgt} --iter-decode-max-iter 0 \
     --iter-decode-eos-penalty 0 --iter-decode-with-beam 1 --gen-subset test \
@@ -125,9 +120,9 @@ python inference.py ${data_dir} --path ${checkpoint_path} --user-dir block_plugi
     --batch ${batch} --beam ${beam} --strategy ${strategy}
 ```
 
-> We test the inference latency of GAD with batch 1 implementation, check `inference_paper.py` for details.
+> We test the inference latency of SpecDec with batch 1 implementation, check `inference_paper.py` for details.
 >
-> check `inference_drafter.py` for inference with our NAT drafter only.
+> check `inference_drafter.py` for inference with our NAR drafter only.
 
 Calculating compound split bleu:
 
@@ -150,13 +145,13 @@ You can find the translation results in `./output`.
 
 ## Extra Memory Cost
 
-Since there is no need to save intermediate variables during inference, GAD can achieve **3x~5x decoding speedup** (by alternating NAT and AT decoding) with only **~300MiB of extra memory cost**. Below is the `nvidia-smi` memory cost comparison of AT and GAD, tested on WMT14 EN-DE:
+Since there is no need to save intermediate variables during inference, SpecDec can achieve **3x~5x decoding speedup** (by alternating NAR and AR decoding) with only **~300MiB of extra memory cost**. Below is the `nvidia-smi` memory cost comparison of AR and SpecDec, tested on WMT14 EN-DE:
 
 | Model \ Batch Size | Model States (Params) |  1   |  4   |  8   |  16  |  32  |
 | ------------------ | :-------------------: | :--: | :--: | :--: | :--: | :--: |
 | Fairseq (beam1)    |        232.38         | 1670 | 1712 | 1758 | 1844 | 2028 |
-| GAD++              |   469.75 (AT + NAT)   | 1902 | 1938 | 2012 | 2108 | 2298 |
-| Extra Memory       |     237.38 (NAT)      | 232  | 226  | 254  | 264  | 270  |
+| SpecDec            |   469.75 (AR + NAR)   | 1902 | 1938 | 2012 | 2108 | 2298 |
+| Extra Memory       |     237.38 (NAR)      | 232  | 226  | 254  | 264  | 270  |
 
 ## Note
 

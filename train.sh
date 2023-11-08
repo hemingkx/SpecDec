@@ -17,7 +17,7 @@ python train.py ${bin_path} --arch block \
     --weight-decay 0.01 --dropout ${dropout} --encoder-layers 6 --encoder-embed-dim 512 --decoder-layers 6 \
     --decoder-embed-dim 512 --fp16 --max-source-positions 1000 --max-target-positions 1000 --max-update ${update}\
     --seed ${seed} --clip-norm 5 --save-dir ./checkpoints \
-    --src-embedding-copy --log-interval 1000 --user-dir block_plugins --block-size ${size} --total-up ${update} \
+    --src-embedding-copy --log-interval 1000 --user-dir specdec_plugins --block-size ${size} --total-up ${update} \
     --update-freq ${update_freq} --decoder-learned-pos --encoder-learned-pos --apply-bert-init --activation-fn gelu \
     --restore-file ./checkpoints/initial_checkpoint.pt \
     --reset-optimizer --reset-meters --reset-lr-scheduler --reset-dataloader

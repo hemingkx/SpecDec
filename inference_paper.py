@@ -146,8 +146,8 @@ def forward_decoder(model,
 
 
 @torch.no_grad()
-def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, tau=0, max_len=200):
-    # Generalized Aggressive Decoding
+def specdec_generate(data_lines, model, AR_model, task, block_size, device, beta=1, tau=0, max_len=200):
+    # Speculative Decoding
     src_dict = task.source_dictionary
     tgt_dict = task.target_dictionary
     encoder_state_ids = []
@@ -155,7 +155,7 @@ def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, 
         encoder_state_ids.append(AR_model.decoder.layers[i].encoder_attn._incremental_state_id)
     data_size = len(data_lines)
     all_results = []
-    logger.info(f'GAD generate')
+    logger.info(f'SpecDec generate')
     pass_tokens = [0] * max_len
     sent_nums = [0] * max_len
     start = time.perf_counter()
@@ -171,11 +171,11 @@ def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, 
         prev_output_tokens = [tgt_dict.unk()] * block_size
         start_pos = 0
         for step in range(0, max_len):
-            start_pos, prev_output_tokens, pass_token = gad_forward(incremental_state, encoder_state_ids,
-                                                                    start_pos, block_size, tgt_dict,
-                                                                    prev_output_tokens,
-                                                                    encoder_out, AR_encoder_out, model,
-                                                                    AR_model, beta, tau)
+            start_pos, prev_output_tokens, pass_token = specdec_forward(incremental_state, encoder_state_ids,
+                                                                        start_pos, block_size, tgt_dict,
+                                                                        prev_output_tokens,
+                                                                        encoder_out, AR_encoder_out, model,
+                                                                        AR_model, beta, tau)
             pass_tokens[step] += pass_token
             sent_nums[step] += 1
             if start_pos == -1:
@@ -204,8 +204,8 @@ def gad_generate(data_lines, model, AR_model, task, block_size, device, beta=1, 
 
 
 @torch.no_grad()
-def gad_forward(incremental_state, encoder_state_ids, start_pos, block_size, tgt_dict, prev_output_tokens,
-                encoder_out, AR_encoder_out, model, AR_model, beta, tau, max_len=200):
+def specdec_forward(incremental_state, encoder_state_ids, start_pos, block_size, tgt_dict, prev_output_tokens,
+                    encoder_out, AR_encoder_out, model, AR_model, beta, tau, max_len=200):
     output_tokens = torch.tensor([prev_output_tokens]).to(device)
     block_mask = torch.zeros_like(output_tokens).to(output_tokens)
     block_mask[0][start_pos:start_pos + block_size] = 1
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('--AR-path', type=str, default=None,
                         help='path to AR model')
     parser.add_argument('--strategy', type=str, default='fairseq',
-                        help='decoding strategy, choose from: fairseq, AR, gad')
+                        help='decoding strategy, choose from: fairseq, AR, specdec')
     parser.add_argument('--batch', type=int, default=None,
                         help='batch size')
     parser.add_argument('--block-size', type=int, default=5,
@@ -286,7 +286,7 @@ if __name__ == '__main__':
         device = torch.device('cuda')
 
     # NAR drafter
-    if cmd_args.strategy == 'gad':
+    if cmd_args.strategy == 'specdec':
         logger.info("loading model(s) from {}".format(cfg.common_eval.path))
         models, _model_args, _model_task = load_model_ensemble_and_task(filenames=[cfg.common_eval.path], task=task)
         model = models[0].to(device).eval()
@@ -304,11 +304,11 @@ if __name__ == '__main__':
         logger.info("Decoding Strategy: Simplified AR")
         remove_bpe_results, delta = baseline_generate(bpe_sents, AR_model, _AR_model_task, device)
         logger.info(f'Simplified AR generate: {delta}')
-    elif cmd_args.strategy == 'gad':
-        logger.info("Decoding Strategy: GAD")
-        remove_bpe_results, delta = gad_generate(bpe_sents, model, AR_model, task, cmd_args.block_size, device,
-                                                 beta=cmd_args.beta, tau=cmd_args.tau)
-        logger.info(f'GAD generate: {delta}')
+    elif cmd_args.strategy == 'specdec':
+        logger.info("Decoding Strategy: SpecDec")
+        remove_bpe_results, delta = specdec_generate(bpe_sents, model, AR_model, task, cmd_args.block_size, device,
+                                                     beta=cmd_args.beta, tau=cmd_args.tau)
+        logger.info(f'SpecDec generate: {delta}')
     else:
         logger.info("Decoding Strategy: fairseq")
         remove_bpe_results, delta = fairseq_generate(bpe_sents, cfg, AR_models, _AR_model_task, cmd_args.batch, device)
