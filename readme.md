@@ -162,10 +162,10 @@ This code is based on GLAT [(https://github.com/FLC777/GLAT)](https://github.com
 If you find the resources in this repository useful, please cite our paper:
 
 ```
-@article{Xia2022GAD,
-	title = {Lossless Speedup of Autoregressive Translation with Generalized Aggressive Decoding},
+@article{Xia2022SpecDec,
+	title = {Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation},
 	journal = {ArXiv},
-	author = {Xia, Heming and Ge, Tao and Wei, Furu and Sui, Zhifang},
+	author = {Xia, Heming and Ge, Tao and Wang, Peiyi and Chen, Si-Qing and Wei, Furu and Sui, Zhifang},
 	year = {2022},
 	note = {arXiv: 2203.16487}
 }
