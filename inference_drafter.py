@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     logger.info("Decoding Strategy: Spec-Drafter")
     remove_bpe_results, delta = drafter_generate(bpe_sents, model, task, cmd_args.block_size, device)
-    logger.info(f'GAD generate: {delta}')
+    logger.info(f'Spec-Drafter generate: {delta}')
 
     if cmd_args.output_path is not None:
         write_result(remove_bpe_results, cmd_args.output_path)

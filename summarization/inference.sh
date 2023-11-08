@@ -1,10 +1,10 @@
-data_dir=/home/hemingkx/GAD/summarization/data # the dir that contains dict files, please use absolute path here
+data_dir=/home/xiaheming/workspace/SpecDec/summarization/data # the dir that contains dict files, please use absolute path here
 checkpoint_path=./checkpoints/cnn-dm-base-nat-drafter-checkpoint.avg10.pt # the dir that contains NAT drafter checkpoint
 AR_checkpoint_path=./checkpoints/cnn-dm-base-at-verifier.pt # the dir that contains AT verifier checkpoint
 input_path=./data/test.source # the dir that contains raw test files
 output_path=./output/result.hypo # the dir for outputs
 
-strategy='gad' # 'fairseq', 'AR', 'gad'
+strategy='specdec' # 'fairseq', 'AR', 'specdec'
 batch=1
 beam=1
 max_len=200

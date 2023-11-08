@@ -26,11 +26,11 @@ def write_result(results, output_file):
 
 
 @torch.no_grad()
-def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200):
+def drafter_generate(data_lines, model, bart, task, block_size, device, max_len=200):
     tgt_dict = task.target_dictionary
     data_size = len(data_lines)
     remove_bpe_results = []
-    logger.info(f'GAD generate')
+    logger.info(f'SpecDec generate')
     pass_tokens = [0] * max_len
     sent_nums = [0] * max_len
     start = time.perf_counter()
@@ -42,9 +42,9 @@ def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200)
         prev_output_tokens = [tgt_dict.unk()] * block_size
         start_pos = 0
         for step in range(0, max_len):
-            start_pos, prev_output_tokens, pass_token = gad_forward(start_pos, block_size, tgt_dict,
-                                                                    prev_output_tokens,
-                                                                    encoder_out, model)
+            start_pos, prev_output_tokens, pass_token = drafter_forward(start_pos, block_size, tgt_dict,
+                                                                        prev_output_tokens,
+                                                                        encoder_out, model)
             pass_tokens[step] += pass_token
             sent_nums[step] += 1
             if start_pos == -1:
@@ -74,7 +74,7 @@ def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200)
 
 
 @torch.no_grad()
-def gad_forward(start_pos, block_size, tgt_dict, prev_output_tokens, encoder_out, model, max_len=200):
+def drafter_forward(start_pos, block_size, tgt_dict, prev_output_tokens, encoder_out, model, max_len=200):
     output_tokens = torch.tensor([prev_output_tokens]).to(device)
     block_mask = torch.zeros_like(output_tokens).to(output_tokens)
     block_mask[0][start_pos:start_pos + block_size] = 1
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument('--output-path', type=str, default=None,
                         help='path to output file')
     parser.add_argument('--AR-path', type=str, default=None,
-                        help='path to AT verifier model')
+                        help='path to AR verifier model')
     parser.add_argument('--block-size', type=int, default=5,
                         help='block size')
     cmd_args = options.parse_args_and_arch(parser)
@@ -147,9 +147,9 @@ if __name__ == '__main__':
     with open(cmd_args.input_path, 'r') as f:
         raw_sents = [l.strip() for l in f.readlines()]
 
-    logger.info("Decoding Strategy: GAD")
-    remove_bpe_results, delta = gad_generate(raw_sents, model, AR_model, task, cmd_args.block_size, device)
-    logger.info(f'GAD generate: {delta}')
+    logger.info("Decoding Strategy: Spec-Drafter")
+    remove_bpe_results, delta = drafter_generate(raw_sents, model, AR_model, task, cmd_args.block_size, device)
+    logger.info(f'Spec-Drafter generate: {delta}')
 
     if cmd_args.output_path is not None:
         write_result(remove_bpe_results, cmd_args.output_path)

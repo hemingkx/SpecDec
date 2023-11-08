@@ -141,12 +141,12 @@ def forward_decoder(model,
 
 
 @torch.no_grad()
-def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200, beta=1, tau=0):
+def specdec_generate(data_lines, model, bart, task, block_size, device, max_len=200, beta=1, tau=0):
     tgt_dict = task.target_dictionary
     encoder_state_ids = []
     data_size = len(data_lines)
     remove_bpe_results = []
-    logger.info(f'GAD generate')
+    logger.info(f'SpecDec generate')
     pass_tokens = [0] * max_len
     sent_nums = [0] * max_len
     start = time.perf_counter()
@@ -164,11 +164,11 @@ def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200,
         prev_output_tokens = [tgt_dict.unk()] * block_size
         start_pos = 0
         for step in range(0, max_len):
-            start_pos, prev_output_tokens, pass_token = gad_forward(incremental_state, encoder_state_ids,
-                                                                    start_pos, block_size, tgt_dict,
-                                                                    prev_output_tokens,
-                                                                    encoder_out, AR_encoder_out, model,
-                                                                    AR_model, beta, tau)
+            start_pos, prev_output_tokens, pass_token = specdec_forward(incremental_state, encoder_state_ids,
+                                                                        start_pos, block_size, tgt_dict,
+                                                                        prev_output_tokens,
+                                                                        encoder_out, AR_encoder_out, model,
+                                                                        AR_model, beta, tau)
             pass_tokens[step] += pass_token
             sent_nums[step] += 1
             if start_pos == -1:
@@ -198,8 +198,8 @@ def gad_generate(data_lines, model, bart, task, block_size, device, max_len=200,
 
 
 @torch.no_grad()
-def gad_forward(incremental_state, encoder_state_ids, start_pos, block_size, tgt_dict, prev_output_tokens,
-                  encoder_out, AR_encoder_out, model, bart, beta, tau, max_len=200):
+def specdec_forward(incremental_state, encoder_state_ids, start_pos, block_size, tgt_dict, prev_output_tokens,
+                    encoder_out, AR_encoder_out, model, bart, beta, tau, max_len=200):
     output_tokens = torch.tensor([prev_output_tokens]).to(device)
     block_mask = torch.zeros_like(output_tokens).to(output_tokens)
     block_mask[0][start_pos:start_pos + block_size] = 1
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     parser.add_argument('--AR-path', type=str, default=None,
                         help='path to AR model')
     parser.add_argument('--strategy', type=str, default='fairseq',
-                        help='decoding strategy, choose from: fairseq, AR, gad')
+                        help='decoding strategy, choose from: fairseq, AR, specdec')
     parser.add_argument('--batch', type=int, default=1,
                         help='batch size')
     parser.add_argument('--max-len', type=int, default=200,
@@ -282,7 +282,7 @@ if __name__ == '__main__':
     else:
         device = torch.device('cuda')
 
-    if cmd_args.strategy == 'gad':
+    if cmd_args.strategy == 'specdec':
         logger.info("loading model(s) from {}".format(cfg.common_eval.path))
         models, _model_args, _model_task = load_model_ensemble_and_task(filenames=[cfg.common_eval.path], task=task)
         model = models[0].to(device).eval()
@@ -299,11 +299,11 @@ if __name__ == '__main__':
         logger.info("Decoding Strategy: Simplified AR")
         remove_bpe_results, delta = baseline_generate(raw_sents, AR_model, task, device, max_len=cmd_args.max_len)
         logger.info(f"AR generate: {delta}")
-    elif cmd_args.strategy == 'gad':
-        logger.info("Decoding Strategy: GAD")
-        remove_bpe_results, delta = gad_generate(raw_sents, model, AR_model, task, cmd_args.block_size, device,
-                                                 max_len=cmd_args.max_len, beta=cmd_args.beta, tau=cmd_args.tau)
-        logger.info(f'GAD generate: {delta}')
+    elif cmd_args.strategy == 'specdec':
+        logger.info("Decoding Strategy: SpecDec")
+        remove_bpe_results, delta = specdec_generate(raw_sents, model, AR_model, task, cmd_args.block_size, device,
+                                                     max_len=cmd_args.max_len, beta=cmd_args.beta, tau=cmd_args.tau)
+        logger.info(f'SpecDec generate: {delta}')
     else:
         logger.info("Decoding Strategy: fairseq")
         eval_kwargs = CNN_KWARGS

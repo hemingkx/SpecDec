@@ -2,19 +2,19 @@
 
 ## Introduction
 
-This folder contains the codes and checkpoints of GAD on the summarization task (CNN-Daily Mail).
+This folder contains the codes and checkpoints of SpecDec on the summarization task (CNN-Daily Mail).
 
 ## Download
 
 | Description | Model                                                        |
 | ----------- | ------------------------------------------------------------ |
-| Model       | [at-verifier-base](https://drive.google.com/file/d/1Kp8W89QjjSC7JbxgxQLkPW6jaczw18Ct/view?usp=sharing)， [nat-drafter-base (k=25)](https://drive.google.com/file/d/1JvRNV4QsoWpVs1bHiozeJb8kRnln4x1K/view?usp=sharing) |
+| Model       | [ar-verifier-base](https://drive.google.com/file/d/1Kp8W89QjjSC7JbxgxQLkPW6jaczw18Ct/view?usp=sharing)， [nar-drafter-base (k=25)](https://drive.google.com/file/d/1JvRNV4QsoWpVs1bHiozeJb8kRnln4x1K/view?usp=sharing) |
 | Test Data   | [cnn-dm-test](https://drive.google.com/drive/folders/1eZON9kb5Ga2bHN0_v24Q1BsopWVTZDFL?usp=sharing) |
 
 ## Installation
 
 ```
-conda activate gad
+conda activate specdec
 pip install requests # to download BART encoder.json
 ```
 
@@ -24,7 +24,7 @@ The raw datasets we used can be obtained following [Fairseq-Summarization](https
 
 ## Finetune
 
-We use BART to initialize **our AT verifier** and finetune it on the distilled data.
+We use BART to initialize **our AR verifier** and finetune it on the distilled data.
 
 ```
 fairseq-train cnn_dm-distilled-bin \
@@ -50,7 +50,7 @@ fairseq-train cnn_dm-distilled-bin \
     --find-unused-parameters;
 ```
 
-For training **the NAT drafter** of GAD:
+For training **the NAR drafter** of SpecDec:
 
 ```
 python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddings \
@@ -62,7 +62,7 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
     --decoder-embed-dim 512 --fp16 --max-source-positions 1000 \
     --max-target-positions 1000 --max-update ${update} --seed ${seed} --clip-norm 5 \
     --save-dir ./checkpoints --src-embedding-copy --log-interval 1000 \
-    --user-dir block_plugins --block-size ${size} --total-up ${update} \
+    --user-dir specdec_plugins --block-size ${size} --total-up ${update} \
     --update-freq ${update_freq} --decoder-learned-pos --encoder-learned-pos \
     --apply-bert-init --activation-fn gelu \
     --restore-file ./checkpoints/initial_checkpoint.pt \
@@ -71,10 +71,10 @@ python train.py ${bin_path} --arch block --noise block_mask --share-all-embeddin
 
 ## Inference
 
-For GAD++   (check `inference_paper.sh`, set `beta=1` for vanilla GAD):
+For SpecDec   (check `inference_paper.sh`, set `beta=1` for identical results to AR greedy decoding):
 
 ```
-python inference_paper.py ${data_dir} --path ${checkpoint_path} --user-dir block_plugins \
+python inference_paper.py ${data_dir} --path ${checkpoint_path} --user-dir specdec_plugins \
       --task translation_lev_modified --remove-bpe --max-sentences 20 \
       --source-lang source --target-lang target --iter-decode-max-iter 0 \
       --iter-decode-eos-penalty 0 --iter-decode-with-beam 1 --gen-subset test \
