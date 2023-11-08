@@ -138,8 +138,7 @@ We put the first three tokenized sentences of WMT14 EN-DE in `data/wmt14.en-de/e
 | --------------- | :-----------------------: | :---------: |
 | Fairseq (beam5) |           1.00            |    0.83     |
 | Fairseq (beam1) |           1.00            |    0.81     |
-| vanilla GAD     |           3.55            |    0.44     |
-| GAD++           |           6.18            |    0.27     |
+| SpecDec         |           6.18            |    0.27     |
 
 You can find the translation results in `./output`.
 
