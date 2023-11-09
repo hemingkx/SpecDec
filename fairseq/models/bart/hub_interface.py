@@ -103,7 +103,7 @@ class BARTHubInterface(GeneratorHubInterface):
         for batch in self._build_batches(tokenized_sentences, skip_invalid_size_inputs):
             src_tokens = batch['net_input']['src_tokens']
             """
-            # delete these lines for GAD fairseq baseline implementation
+            # delete these lines for SpecDec fairseq baseline implementation
             inference_step_args["prefix_tokens"] =src_tokens.new_full(
                 (src_tokens.size(0), 1), fill_value=self.task.source_dictionary.bos()
             ).to(device=self.device)
