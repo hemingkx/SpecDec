@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository contains the code used to reimplement our paper: [Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation](https://arxiv.org/pdf/2203.16487.pdf).
+This repository contains the code used to reimplement our paper: [Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation](https://aclanthology.org/2023.findings-emnlp.257.pdf).
 
 ![SpecDec](./SpecDec.gif)
 
@@ -161,12 +161,24 @@ This code is based on GLAT [(https://github.com/FLC777/GLAT)](https://github.com
 If you find the resources in this repository useful, please cite our paper:
 
 ```
-@article{Xia2022SpecDec,
-	title = {Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation},
-	journal = {ArXiv},
-	author = {Xia, Heming and Ge, Tao and Wang, Peiyi and Chen, Si-Qing and Wei, Furu and Sui, Zhifang},
-	year = {2022},
-	note = {arXiv: 2203.16487}
+@inproceedings{xia-etal-2023-speculative,
+    title = "Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation",
+    author = "Xia, Heming  and
+      Ge, Tao  and
+      Wang, Peiyi  and
+      Chen, Si-Qing  and
+      Wei, Furu  and
+      Sui, Zhifang",
+    editor = "Bouamor, Houda  and
+      Pino, Juan  and
+      Bali, Kalika",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2023",
+    month = dec,
+    year = "2023",
+    address = "Singapore",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.findings-emnlp.257",
+    pages = "3909--3925",
 }
 ```
 
